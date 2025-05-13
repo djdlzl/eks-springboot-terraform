@@ -1,0 +1,83 @@
+variable "region" {
+  description = "AWS region"
+  type        = string
+  default     = "ap-northeast-2"
+}
+
+variable "vpc_name" {
+  description = "Name of the VPC"
+  type        = string
+  default     = "eks-vpc"
+}
+
+variable "vpc_cidr" {
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "10.21.0.0/16"
+}
+
+variable "availability_zones" {
+  description = "List of availability zones"
+  type        = list(string)
+  default     = ["ap-northeast-2a", "ap-northeast-2c"]
+}
+
+variable "public_subnet_cidrs" {
+  description = "CIDR blocks for public subnets"
+  type        = list(string)
+  default     = ["10.21.0.0/24", "10.21.1.0/24"]
+}
+
+variable "private_subnet_cidrs" {
+  description = "CIDR blocks for private subnets"
+  type        = list(string)
+  default     = ["10.21.32.0/24", "10.21.33.0/24"]
+}
+
+variable "environment" {
+  description = "Environment name"
+  type        = string
+  default     = "dev"
+}
+
+variable "eks_cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+  default     = "my-eks-cluster"
+}
+
+variable "eks_cluster_version" {
+  description = "Kubernetes version for EKS cluster"
+  type        = string
+  default     = "1.27"
+}
+
+variable "node_instance_type" {
+  description = "Instance type for EKS nodes"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "node_desired_size" {
+  description = "Desired number of nodes per node group"
+  type        = number
+  default     = 1
+}
+
+variable "node_min_size" {
+  description = "Minimum number of nodes per node group"
+  type        = number
+  default     = 1
+}
+
+variable "node_max_size" {
+  description = "Maximum number of nodes per node group"
+  type        = number
+  default     = 1
+}
+
+variable "alb_name" {
+  description = "Name of the Application Load Balancer"
+  type        = string
+  default     = "app-alb"
+}
