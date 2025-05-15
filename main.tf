@@ -11,41 +11,101 @@ terraform {
 # AWS 프로바이더 설정
 provider "aws" {
   region = var.region
+
+  # 리소스에 기본적으로 적용할 태그
+  default_tags {
+    tags = var.common_tags
+  }
 }
 
 # VPC 모듈 호출
+# EKS 클러스터를 위한 네트워크 인프라 구성
 module "vpc" {
-  source = "./modules/vpc"
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
 
-  vpc_name            = var.vpc_name
-  vpc_cidr           = var.vpc_cidr
-  availability_zones = var.availability_zones
-  public_subnet_cidrs  = var.public_subnet_cidrs
-  private_subnet_cidrs = var.private_subnet_cidrs
-  environment         = var.environment
+  name = var.vpc_name
+  cidr = var.vpc_cidr
+
+  azs = var.availability_zones
+
+  public_subnets   = var.public_subnet_cidrs
+  private_subnets  = var.private_subnet_cidrs
+
+  enable_nat_gateway     = true
+  single_nat_gateway     = true
+  one_nat_gateway_per_az = false
+
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+
+  tags = merge(var.common_tags, {
+    Name = var.vpc_name
+  })
+
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = "1"
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb" = "1"
+  }
 }
+
+# 현재 AWS 계정 ID 가져오기
+data "aws_caller_identity" "current" {}
 
 # EKS 모듈 호출
+# VPC 모듈에 의존성이 있으므로 VPC 생성 후 생성됨
 module "eks" {
-  source = "./modules/eks"
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.31.0"
 
-  cluster_name        = var.eks_cluster_name
-  cluster_version     = var.eks_cluster_version
-  vpc_id              = module.vpc.vpc_id
-  private_subnet_ids  = module.vpc.private_subnet_ids
-  node_instance_type  = var.node_instance_type
-  node_desired_size   = var.node_desired_size
-  node_min_size       = var.node_min_size
-  node_max_size       = var.node_max_size
-  environment         = var.environment
+  cluster_name    = var.eks_cluster_name
+  cluster_version = var.eks_cluster_version
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = concat(module.vpc.private_subnets, module.vpc.public_subnets)
+
+  eks_managed_node_groups = {
+    general = {
+      desired_size = var.node_desired_size
+      max_size     = var.node_max_size
+      min_size     = var.node_min_size
+
+      instance_types = [var.node_instance_type]
+      capacity_type  = "ON_DEMAND"
+    }
+  }
+
+  # AWS IAM 인증 설정
+  cluster_endpoint_public_access = true
+  cluster_endpoint_private_access = true
+
+  # 클러스터 생성자에게 관리자 권한 부여
+  authentication_mode = "API_AND_CONFIG_MAP"
+  enable_cluster_creator_admin_permissions = true
+
+  tags = merge(var.common_tags, {
+    Name = var.vpc_name
+  })
 }
 
-# ALB 모듈 호출
+
+# Application Load Balancer (ALB) 모듈 설정
+# 퍼블릭 서브넷에 ALB를 생성하고 관리합니다.
 module "alb" {
   source = "./modules/alb"
 
-  alb_name        = var.alb_name
-  vpc_id          = module.vpc.vpc_id
-  public_subnet_ids = module.vpc.public_subnet_ids
-  environment     = var.environment
+  alb_name           = var.alb_name
+  vpc_id            = module.vpc.vpc_id
+  public_subnet_ids = module.vpc.public_subnets
+  environment       = var.environment
+  
+  tags = {
+    Environment = var.environment
+    Terraform   = "true"
+    Name        = var.alb_name
+    ManagedBy   = "terraform"
+  }
 }

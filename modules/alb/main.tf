@@ -46,7 +46,7 @@ resource "aws_lb_target_group" "this" {
   health_check {
     path                = "/"
     interval            = 30
-    og_type             = "HTTP"
+    protocol            = "HTTP"
     timeout             = 5
     healthy_threshold   = 5
     unhealthy_threshold = 2

@@ -7,7 +7,7 @@ variable "region" {
 variable "vpc_name" {
   description = "Name of the VPC"
   type        = string
-  default     = "eks-vpc"
+  default     = "jw-eks-vpc"
 }
 
 variable "vpc_cidr" {
@@ -23,13 +23,13 @@ variable "availability_zones" {
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets"
+  description = "CIDR blocks for public subnets (one per AZ)"
   type        = list(string)
   default     = ["10.21.0.0/24", "10.21.1.0/24"]
 }
 
 variable "private_subnet_cidrs" {
-  description = "CIDR blocks for private subnets"
+  description = "CIDR blocks for private subnets (one per AZ)"
   type        = list(string)
   default     = ["10.21.32.0/24", "10.21.33.0/24"]
 }
@@ -43,13 +43,19 @@ variable "environment" {
 variable "eks_cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
-  default     = "my-eks-cluster"
+  default     = "jw-eks-cluster"
 }
 
 variable "eks_cluster_version" {
   description = "Kubernetes version for EKS cluster"
   type        = string
-  default     = "1.27"
+  default     = "1.31"
+}
+
+variable "alb_name" {
+  description = "Name of the Application Load Balancer"
+  type        = string
+  default     = "jw-eks-cluster-alb"
 }
 
 variable "node_instance_type" {
@@ -76,8 +82,12 @@ variable "node_max_size" {
   default     = 1
 }
 
-variable "alb_name" {
-  description = "Name of the Application Load Balancer"
-  type        = string
-  default     = "app-alb"
+variable "common_tags" {
+  description = "공통으로 적용할 태그"
+  type        = map(string)
+  default     = {
+    Environment = "dev"
+    Terraform   = "true"
+    Project     = "eks-infra"
+  }
 }
