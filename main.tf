@@ -32,6 +32,9 @@ module "vpc" {
   public_subnets   = var.public_subnet_cidrs
   private_subnets  = var.private_subnet_cidrs
 
+  public_subnet_names = var.public_subnet_names
+  private_subnet_names = var.private_subnet_names
+
   enable_nat_gateway     = true
   single_nat_gateway     = true
   one_nat_gateway_per_az = false
@@ -55,26 +58,24 @@ module "vpc" {
 # 현재 AWS 계정 ID 가져오기
 data "aws_caller_identity" "current" {}
 
-# EKS 모듈 호출
-# VPC 모듈에 의존성이 있으므로 VPC 생성 후 생성됨
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.31.0"
+  version = "~> 20.31"
 
   cluster_name    = var.eks_cluster_name
   cluster_version = var.eks_cluster_version
 
   vpc_id     = module.vpc.vpc_id
-  subnet_ids = concat(module.vpc.private_subnets, module.vpc.public_subnets)
+  subnet_ids = module.vpc.private_subnets
 
   eks_managed_node_groups = {
-    general = {
-      desired_size = var.node_desired_size
-      max_size     = var.node_max_size
-      min_size     = var.node_min_size
-
+    # AZ별로 노드 그룹 분리 (각 프라이빗 서브넷에 노드)
+    spring_node_group = {
       instance_types = [var.node_instance_type]
-      capacity_type  = "ON_DEMAND"
+      desired_size   = var.node_desired_size
+      min_size       = var.node_min_size
+      max_size       = var.node_max_size
+      subnet_ids     = module.vpc.private_subnets
     }
   }
 
@@ -90,7 +91,6 @@ module "eks" {
     Name = var.vpc_name
   })
 }
-
 
 # Application Load Balancer (ALB) 모듈 설정
 # 퍼블릭 서브넷에 ALB를 생성하고 관리합니다.
