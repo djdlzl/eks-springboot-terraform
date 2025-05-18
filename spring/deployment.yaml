@@ -34,7 +34,7 @@ spec:
             topologyKey: topology.kubernetes.io/zone
       containers:
       - name: spring-boot
-        image: djdlzl/spring-repo:latest
+        image: djdlzl/spring-repo:latest # docker hub repository image
         ports:
         - containerPort: 8080
         resources:

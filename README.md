@@ -1,7 +1,7 @@
 # EKS Infrastructure with Terraform
 
 ## 개요
-이 프로젝트는 Terraform을 사용하여 AWS EKS를 프로비저닝하고 Spring Boot 애플리케이션을 배포하는 테라폼 코드입니다.
+Terraform을 사용하여 AWS EKS를 프로비저닝하고 Spring Boot 애플리케이션을 배포하는 프로젝트입니다.
 
 ## 주요 구성 요소
 
@@ -24,6 +24,9 @@
   - IAM 인증 설정
 
 ### 2. Spring Boot 애플리케이션 배포
+- Docker 이미지
+  - 저장소: [djdlzl/spring-repo](https://hub.docker.com/repository/docker/djdlzl/spring-repo/general)
+  - 태그: latest
 - Kubernetes Deployment
   - 2개의 복제본
   - AZ별 노드 선호도 설정
