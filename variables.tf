@@ -65,12 +65,6 @@ variable "eks_cluster_version" {
   default     = "1.32"
 }
 
-variable "alb_name" {
-  description = "Name of the Application Load Balancer"
-  type        = string
-  default     = "jw-eks-cluster-alb"
-}
-
 variable "node_instance_type" {
   description = "Instance type for EKS nodes"
   type        = string
