@@ -82,9 +82,10 @@ kubectl apply -f *.yaml
 ```
 
 ## 참고사항
-- 모든 AWS 리소스는 태그를 통한 관리가 가능합니다.
-- EKS 클러스터는 멀티 AZ로 구성되어 고가용성을 제공합니다.
-- Spring Boot 애플리케이션은 AZ 간 고르게 분산되어 실행됩니다.
+- NAT는 각 AZ에 1대씩, 총 2대 생성됩니다.
+- Private Subnet은 각 AZ의 NAT를 통해 아웃바운드 통신이 가능합니다.
+- EKS Node는 AZ에 1대씩 프로비저닝 됩니다.
+- Spring Boot 애플리케이션은 각 AZ에 분산되어 배포됩니다.
 
 ## Destroy 시
 - Ingress로 생성된 ALB, SG를 삭제 후 Terraform destroy 명령어를 실행해주세요.
