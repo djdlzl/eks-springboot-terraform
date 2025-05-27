@@ -25,7 +25,7 @@ Terraform을 사용하여 AWS EKS를 프로비저닝하고 Spring Boot 애플리
 
 ### 2. Spring Boot 애플리케이션 배포
 - Docker 이미지
-  - 저장소: [djdlzl/spring-repo](https://hub.docker.com/repository/docker/djdlzl/spring-repo/general)
+  - 저장소: [djdlzl/spring-repo](https://hub.docker.com/r/djdlzl/spring-repo)
   - 태그: latest
 - Kubernetes Deployment
   - 2개의 복제본
